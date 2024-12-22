@@ -1,0 +1,66 @@
+// Define pins
+ int TRIG_PIN = 6;     // Trigger pin for HC-SR04
+ int ECHO_PIN = 7;     // Echo pin for HC-SR04
+ int BUZZER_PIN = 11;  // Pin for buzzer
+ int LED_PIN_10 = 10;  // Pin for LED at 15 cm or less
+ int LED_PIN_12 = 12;  // Pin for LED at 10 cm or less
+int DISTANCE_THRESHOLD = 9; // Threshold distance for buzzer in cm (half of the original)
+
+float duration_us; // Variable to store pulse duration
+float distance_cm; // Variable to store calculated distance
+
+void setup() {
+  Serial.begin(9600);        // Initialize serial communication
+  pinMode(TRIG_PIN, OUTPUT); // Set trigger pin as output
+  pinMode(ECHO_PIN, INPUT);  // Set echo pin as input
+  pinMode(BUZZER_PIN, OUTPUT); // Set buzzer pin as output
+  pinMode(LED_PIN_10, OUTPUT); // Set LED pin 10 as output
+  pinMode(LED_PIN_12, OUTPUT); // Set LED pin 12 as output
+
+  // Ensure the trigger pin is initially low
+  digitalWrite(TRIG_PIN, LOW);
+  digitalWrite(LED_PIN_10, LOW); // Ensure LED 10 is off initially
+  digitalWrite(LED_PIN_12, LOW); // Ensure LED 12 is off initially
+}
+
+void loop() {
+  // Generate a 10-microsecond pulse to trigger the HC-SR04
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  // Measure the duration of the pulse received at the echo pin
+  duration_us = pulseIn(ECHO_PIN, HIGH);
+
+  // Calculate distance in cm (speed of sound = 343 m/s)
+  distance_cm = duration_us * 0.034 / 2;
+
+  // Activate the buzzer if the distance is 6 cm or less
+  if (distance_cm > 0 && distance_cm <= 6) {
+    digitalWrite(BUZZER_PIN, HIGH);
+  } else {
+    digitalWrite(BUZZER_PIN, LOW);
+  }
+
+  // Turn on LED 10 if the distance is 15 cm or less
+  if (distance_cm > 0 && distance_cm <= 15) {
+    digitalWrite(LED_PIN_10, HIGH);
+  } else {
+    digitalWrite(LED_PIN_10, LOW);
+  }
+
+  // Turn on LED 12 if the distance is 10 cm or less
+  if (distance_cm > 0 && distance_cm <= 10) {
+    digitalWrite(LED_PIN_12, HIGH);
+  } else {
+    digitalWrite(LED_PIN_12, LOW);
+  }
+
+  // Print the distance to the Serial Monitor
+  Serial.print("Distance: ");
+  Serial.print(distance_cm);
+  Serial.println(" cm");
+
+  // Wait 500 ms before next measurement
+  delay(500);
+}
